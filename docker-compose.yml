@@ -1,0 +1,36 @@
+version: '3.8'
+
+services:
+  eureka-server:
+    image: eureka
+    restart: always
+    container_name: eureka
+    ports:
+      - '8761:8761'
+    networks:
+      - dockernetflix-network
+
+  gateway-service:
+    image: springcloudgateway
+    restart: always
+    container_name: springcloudgateway
+    # Expone solo el Gateway para que el cliente lo acceda desde localhost:7000
+    ports:
+      - '7000:8080'
+    networks:
+      - dockernetflix-network
+    depends_on:
+      - eureka-server
+
+  greeting-microservice:
+    image: greetmicroservice
+    restart: always
+    container_name: greetmicroservice
+    # CRÍTICO: NO se expone el puerto para que solo se acceda vía Docker Network.
+    networks:
+      - dockernetflix-network
+    depends_on:
+      - eureka-server
+
+networks:
+  dockernetflix-network:
